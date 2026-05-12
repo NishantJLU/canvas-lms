@@ -1,0 +1,182 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-title">Welcome back, {{ current_user.first_name }}!</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">{{ courses|length }}</div>
+        <div class="stat-label">Courses Enrolled</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ gpa|round(2) }}</div>
+        <div class="stat-label">Current GPA</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ attendance_pct }}%</div>
+        <div class="stat-label">Attendance</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ upcoming_assignments|length }}</div>
+        <div class="stat-label">Due Soon</div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-2">
+    <!-- Left Column -->
+    <div>
+        <!-- Upcoming Assignments -->
+        <section class="card">
+            <div class="card-header">
+                <h2 class="card-title">Upcoming Assignments</h2>
+                <a href="{{ url_for('courses_list') }}" class="btn btn-secondary btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </div>
+            
+            {% if upcoming_assignments %}
+                {% for assignment in upcoming_assignments %}
+                <div class="assignment-item">
+                    <div class="assignment-header">
+                        <div>
+                            <div class="assignment-title">{{ assignment.title }}</div>
+                            <div class="assignment-meta">{{ assignment.course.code }} • {{ assignment.points_possible }} points</div>
+                        </div>
+                        {% if assignment.get_days_until_due() <= 3 %}
+                            <span class="badge badge-danger">Urgent</span>
+                        {% elif assignment.get_days_until_due() <= 7 %}
+                            <span class="badge badge-warning">Soon</span>
+                        {% else %}
+                            <span class="badge badge-primary">{{ assignment.get_days_until_due() }} days</span>
+                        {% endif %}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="assignment-meta mt-sm">
+                        Due: {{ assignment.due_date.strftime('%b %d, %H:%M') }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-lg) 0;">
+                    No upcoming assignments
+                </p>
+            {% endif %}
+        </section>
+
+        <!-- Recent Announcements -->
+        <section class="card" style="margin-top: var(--spacing-lg);">
+            <div class="card-header">
+                <h2 class="card-title">Recent Announcements</h2>
+            </div>
+            
+            {% if announcements %}
+                {% for announcement in announcements[:3] %}
+                <div style="padding: var(--spacing-md) 0; border-bottom: 1px solid var(--border-light);">
+                    <div class="assignment-meta">{{ announcement.course.code }}</div>
+                    <div class="assignment-title" style="margin: var(--spacing-sm) 0;">{{ announcement.title }}</div>
+                    <div class="assignment-meta">{{ announcement.created_at.strftime('%b %d') }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-lg) 0;">
+                    No announcements
+                </p>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- Right Column -->
+    <div>
+        <!-- Notifications -->
+        <section class="card">
+            <div class="card-header">
+                <h2 class="card-title">Notifications</h2>
+                <a href="{{ url_for('notifications_view') }}" class="btn btn-secondary btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </div>
+            
+            {% if notifications %}
+                {% for notification in notifications[:5] %}
+                <div style="padding: var(--spacing-md) 0; border-bottom: 1px solid var(--border-light);">
+                    <div class="flex-between">
+                        <div>
+                            <div class="assignment-title" style="font-size: 14px;">{{ notification.title }}</div>
+                            <div class="assignment-meta">{{ notification.created_at.strftime('%b %d, %H:%M') }}</div>
+                        </div>
+                        {% if not notification.is_read %}
+                        <span class="notification-badge"></span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center" style="color: var(--text-secondary); padding: var(--spacing-lg) 0;">
+                    No new notifications
+                </p>
+            {% endif %}
+        </section>
+
+        <!-- Courses Overview -->
+        <section class="card" style="margin-top: var(--spacing-lg);">
+            <div class="card-header">
+                <h2 class="card-title">My Courses</h2>
+                <a href="{{ url_for('courses_list') }}" class="btn btn-secondary btn-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </div>
+            
+            {% if courses %}
+                {% for course in courses[:3] %}
+                <div style="margin-bottom: var(--spacing-lg); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--border-light);">
+                    <div class="flex-between" style="margin-bottom: var(--spacing-sm);">
+                        <div class="assignment-title" style="font-size: 14px;">{{ course.code }}</div>
+                        <span class="badge badge-primary">{{ course.get_completion_percentage() }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ course.get_completion_percentage() }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+<!-- Courses Grid -->
+<section style="margin-top: var(--spacing-2xl);">
+    <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">All Courses</h2>
+    <div class="grid grid-3">
+        {% for course in courses %}
+        <a href="{{ url_for('course_detail', course_slug=course.code) }}" style="text-decoration: none; color: inherit;">
+            <div class="course-card">
+                <div class="course-card-header" style="background: linear-gradient(135deg, {{ course.color }}, {{ course.color }}dd);"></div>
+                <div class="course-card-body">
+                    <div class="course-code">{{ course.code }}</div>
+                    <div class="course-name">{{ course.name }}</div>
+                    <div class="course-instructor">{{ course.instructor.get_full_name() }}</div>
+                    <div class="course-progress">
+                        <div class="progress-bar" style="flex: 1;">
+                            <div class="progress-fill" style="width: {{ course.get_completion_percentage() }}%"></div>
+                        </div>
+                        <div class="course-progress-label">{{ course.get_completion_percentage() }}%</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

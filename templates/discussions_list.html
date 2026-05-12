@@ -1,0 +1,46 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Discussions{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: var(--spacing-xl);">
+    <a href="{{ url_for('course_detail', course_slug=course.code) }}" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: var(--spacing-sm);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Course
+    </a>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
+    <h1 class="page-title" style="margin: 0;">Discussion Forum</h1>
+    <button class="btn btn-primary" onclick="showNewDiscussion()">New Discussion</button>
+</div>
+
+{% if discussions %}
+<div class="grid grid-2">
+    {% for discussion in discussions %}
+    <a href="{{ url_for('discussion_detail', discussion_id=discussion.id) }}" style="text-decoration: none; color: inherit;">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{ discussion.title }}</h3>
+                {% if discussion.is_pinned %}
+                <span class="badge badge-warning">Pinned</span>
+                {% endif %}
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md); font-size: 14px;">{{ discussion.description[:100] if discussion.description else 'No description' }}...</p>
+            <div style="font-size: 12px; color: var(--text-secondary);">
+                <div>{{ discussion.posts.count() }} posts</div>
+                <div>Started by {{ discussion.creator.get_full_name() }}</div>
+                <div>{{ discussion.created_at.strftime('%b %d') }}</div>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: var(--spacing-2xl);">
+    <p style="color: var(--text-secondary);">No discussions yet. <button class="btn btn-primary" onclick="showNewDiscussion()">Start one</button></p>
+</div>
+{% endif %}
+{% endblock %}

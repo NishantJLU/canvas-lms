@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="/">Dashboard</a> <span>/</span> <a href="/courses/{{ course.slug }}">{{ course.code }}</a> <span>/</span> Assignments
+</div>
+
+<div class="course-detail-wrapper">
+    <nav class="course-nav">
+        <ul class="course-nav-list">
+            <li><a href="/courses/{{ course.slug }}" class="course-nav-link">Home</a></li>
+            <li><a href="#" class="course-nav-link">Announcements</a></li>
+            <li><a href="/courses/{{ course.slug }}/assignments" class="course-nav-link active">Assignments</a></li>
+            <li><a href="#" class="course-nav-link">Discussions</a></li>
+            <li><a href="#" class="course-nav-link">Grades</a></li>
+            <li><a href="#" class="course-nav-link">People</a></li>
+            <li><a href="#" class="course-nav-link">Pages</a></li>
+            <li><a href="#" class="course-nav-link">Files</a></li>
+            <li><a href="#" class="course-nav-link">Syllabus</a></li>
+            <li><a href="#" class="course-nav-link">Quizzes</a></li>
+            <li><a href="#" class="course-nav-link">Modules</a></li>
+        </ul>
+    </nav>
+
+    <div class="course-content">
+        <h2>Assignments for {{ course.code }}</h2>
+
+        <!-- Upcoming -->
+        <h3 style="margin-top:24px;">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            Upcoming Assignments
+        </h3>
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Assignment</th>
+                        <th>Due</th>
+                        <th>Status</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in upcoming %}
+                    <tr>
+                        <td>
+                            <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:var(--canvas-blue);"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                        </td>
+                        <td><a href="#"><strong>{{ a.title }}</strong></a></td>
+                        <td>{{ a.due }}</td>
+                        <td>
+                            <span class="status-badge {{ a.status|lower|replace(' ','-') }}">
+                                {{ a.status }}
+                            </span>
+                        </td>
+                        <td>- / {{ a.points }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not upcoming %}
+                    <tr>
+                        <td colspan="5" class="empty-state">No upcoming assignments.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Past -->
+        <h3 style="margin-top:28px;">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+            Past Assignments
+        </h3>
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Assignment</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in past %}
+                    <tr>
+                        <td>
+                            <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:var(--canvas-green);"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                        </td>
+                        <td><a href="#"><strong>{{ a.title }}</strong></a></td>
+                        <td>{{ a.due }}</td>
+                        <td>
+                            <span class="status-badge submitted">{{ a.status }}</span>
+                        </td>
+                        <td>{{ a.score or a.points }} / {{ a.points }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not past %}
+                    <tr>
+                        <td colspan="5" class="empty-state">No past assignments.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <aside class="right-sidebar">
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">Assignment Groups</h2>
+            <div style="font-size:14px;line-height:2;">
+                <div><strong>Assignments</strong> <span style="float:right;color:var(--canvas-text-muted);">45%</span></div>
+                <div><strong>Quizzes</strong> <span style="float:right;color:var(--canvas-text-muted);">25%</span></div>
+                <div><strong>Project</strong> <span style="float:right;color:var(--canvas-text-muted);">20%</span></div>
+                <div><strong>Participation</strong> <span style="float:right;color:var(--canvas-text-muted);">10%</span></div>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}

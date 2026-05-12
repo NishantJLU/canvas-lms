@@ -1,0 +1,68 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Gradebook - {{ course.name }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: var(--spacing-xl);">
+    <a href="{{ url_for('admin_dashboard') }}" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: var(--spacing-sm);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Admin
+    </a>
+</div>
+
+<h1 class="page-title" style="margin-bottom: var(--spacing-lg);">Gradebook - {{ course.name }}</h1>
+
+<div class="card">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--border-light);">
+                <th style="padding: var(--spacing-md); text-align: left;">Student</th>
+                {% for assignment in course.assignments %}
+                <th style="padding: var(--spacing-md); text-align: center; font-size: 12px;">{{ assignment.title[:10] }}</th>
+                {% endfor %}
+                <th style="padding: var(--spacing-md); text-align: center;">Average</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr style="border-bottom: 1px solid var(--border-light);">
+                <td style="padding: var(--spacing-md); font-weight: 500;">{{ student.get_full_name() }}</td>
+                {% for assignment in course.assignments %}
+                {% set submission = student.submissions.filter_by(assignment_id=assignment.id).first() %}
+                <td style="padding: var(--spacing-md); text-align: center;">
+                    {% if submission and submission.score %}
+                    <input type="number" value="{{ submission.score }}" min="0" max="100" class="form-input" style="width: 50px; text-align: center;" onchange="updateGrade({{ submission.id }}, this.value)">
+                    {% else %}
+                    <input type="number" placeholder="-" class="form-input" style="width: 50px; text-align: center; color: var(--text-secondary);">
+                    {% endif %}
+                </td>
+                {% endfor %}
+                <td style="padding: var(--spacing-md); text-align: center; font-weight: 600;">
+                    {{ student.get_gpa()|round(2) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function updateGrade(submissionId, score) {
+        const formData = new FormData();
+        formData.append('score', score);
+        
+        fetch(`/submissions/${submissionId}/grade`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Grade updated');
+            }
+        });
+    }
+</script>
+{% endblock %}

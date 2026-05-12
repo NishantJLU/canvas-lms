@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Grades</h1>
+    <p>All courses</p>
+</div>
+
+<div class="content-wrapper">
+    <main class="main-content">
+        {% for course in courses %}
+        <div style="margin-bottom:36px;">
+            <h2 class="sidebar-heading" style="padding-bottom:8px;margin-bottom:12px;">
+                <span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:{{ course.color }};margin-right:8px;"></span>
+                {{ course.code }}: {{ course.name }}
+            </h2>
+
+            <div style="display:flex;gap:24px;margin-bottom:16px;font-size:14px;">
+                <div><strong>Current grade:</strong> <span class="card-grade-badge grade-{{ 'a' if course.grade.startswith('A') else 'b' if course.grade.startswith('B') else 'c' }}">{{ course.grade }}</span></div>
+                <div><strong>Progress:</strong> {{ course.progress }}%</div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Out of</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in course.assignments %}
+                        <tr>
+                            <td><a href="#"><strong>{{ a.title }}</strong></a></td>
+                            <td>{{ a.due }}</td>
+                            <td>
+                                <span class="status-badge {{ a.status|lower|replace(' ','-') }}">
+                                    {{ a.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if a.status == 'Submitted' %}
+                                {{ a.score or a.points }} / {{ a.points }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>{{ a.points }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </main>
+
+    <aside class="right-sidebar">
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">GPA Summary</h2>
+            <div style="font-size:14px;line-height:2;">
+                {% for course in courses %}
+                <div style="display:flex;justify-content:space-between;">
+                    <span style="color:var(--canvas-text);">{{ course.code }}</span>
+                    <span style="font-weight:600;color:var(--canvas-text);">{{ course.grade }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <a href="#" class="btn btn-primary btn-block" style="margin-top:12px;">Print Report</a>
+    </aside>
+</div>
+{% endblock %}

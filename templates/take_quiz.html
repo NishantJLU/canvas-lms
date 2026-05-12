@@ -1,0 +1,102 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Taking {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: var(--spacing-xl);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+        <div>
+            <h1 class="card-title">{{ quiz.title }}</h1>
+            <div style="font-size: 14px; color: var(--text-secondary);">Question {{ current_question_number }} of {{ total_questions }}</div>
+        </div>
+        {% if quiz.time_limit_minutes %}
+        <div style="text-align: center; padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Time Remaining</div>
+            <div id="timer" style="font-size: 28px; font-weight: 700; color: var(--warning);">{{ quiz.time_limit_minutes }}:00</div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Progress Bar -->
+    <div style="margin-bottom: var(--spacing-lg);">
+        <div style="background: var(--bg-secondary); height: 8px; border-radius: 4px; overflow: hidden;">
+            <div style="background: var(--primary); height: 100%; width: {{ (current_question_number / total_questions * 100)|int }}%;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Question -->
+<div class="card" style="margin-bottom: var(--spacing-xl);">
+    <h2 style="margin-bottom: var(--spacing-lg);">{{ current_question.text }}</h2>
+    
+    {% if current_question.question_type == 'multiple_choice' %}
+        <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+            {% for option in current_question.options %}
+            <label style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition);" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='var(--bg-secondary)'">
+                <input type="radio" name="answer" value="{{ option }}" style="width: 20px; height: 20px;">
+                <span>{{ option }}</span>
+            </label>
+            {% endfor %}
+        </div>
+    {% elif current_question.question_type == 'short_answer' %}
+        <input type="text" id="answer" class="form-input" placeholder="Enter your answer..." style="margin-bottom: var(--spacing-lg);">
+    {% endif %}
+</div>
+
+<!-- Navigation -->
+<div style="display: flex; justify-content: space-between; gap: var(--spacing-md);">
+    {% if current_question_number > 1 %}
+    <button class="btn btn-secondary" onclick="previousQuestion()">← Previous</button>
+    {% else %}
+    <div></div>
+    {% endif %}
+    
+    {% if current_question_number < total_questions %}
+    <button class="btn btn-primary" onclick="nextQuestion()">Next →</button>
+    {% else %}
+    <button class="btn btn-success" onclick="submitQuiz()">Submit Quiz</button>
+    {% endif %}
+</div>
+
+<script>
+    let timeRemaining = {{ quiz.time_limit_minutes * 60 if quiz.time_limit_minutes else 0 }};
+    
+    {% if quiz.time_limit_minutes %}
+    const timer = setInterval(() => {
+        timeRemaining--;
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeRemaining <= 0) {
+            clearInterval(timer);
+            submitQuiz();
+        }
+    }, 1000);
+    {% endif %}
+    
+    function previousQuestion() {
+        // Navigate to previous question
+    }
+    
+    function nextQuestion() {
+        // Navigate to next question
+    }
+    
+    function submitQuiz() {
+        const formData = new FormData();
+        formData.append('answers', JSON.stringify({})); // Collect all answers
+        
+        fetch('{{ url_for("submit_quiz", quiz_id=quiz.id, attempt_id=attempt.id) }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = `{{ url_for("quiz_results", quiz_id=quiz.id, attempt_id=attempt.id) }}`;
+            }
+        });
+    }
+</script>
+{% endblock %}

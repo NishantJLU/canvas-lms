@@ -1,0 +1,60 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Create New Course{% endblock %}
+
+{% block content %}
+<div class="page-title flex-between" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
+    <div>
+        <a href="{{ url_for('admin_dashboard') }}" style="font-size: 14px; text-decoration: none; color: var(--text-secondary); margin-bottom: 8px; display: inline-block;">&larr; Back to Admin Dashboard</a>
+        <div style="font-size: 24px; font-weight: 700;">Create New Course</div>
+    </div>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto; padding: 32px;">
+    <form action="{{ url_for('create_course') }}" method="POST">
+        <div class="form-group" style="margin-bottom: var(--spacing-lg);">
+            <label style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600;">Course Code</label>
+            <input type="text" name="code" class="form-input" style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px;" placeholder="e.g. CS101" required>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: var(--spacing-lg);">
+            <label style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600;">Course Name</label>
+            <input type="text" name="name" class="form-input" style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px;" placeholder="e.g. Introduction to Computer Science" required>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: var(--spacing-lg);">
+            <label style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600;">Description</label>
+            <textarea name="description" class="form-input" style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; min-height: 100px;" placeholder="Provide a brief overview of the course..."></textarea>
+        </div>
+        
+        <div class="grid grid-2" style="margin-bottom: var(--spacing-lg); gap: var(--spacing-lg);">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600;">Term</label>
+                <input type="text" name="term" class="form-input" style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px;" placeholder="e.g. Fall 2024">
+            </div>
+            
+            <div class="form-group">
+                <label style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600;">Credits</label>
+                <input type="number" step="0.5" name="credits" class="form-input" value="3.0" style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px;">
+            </div>
+        </div>
+        
+        <div class="grid grid-2" style="margin-bottom: var(--spacing-xl); gap: var(--spacing-lg);">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600;">Room Location</label>
+                <input type="text" name="room_location" class="form-input" style="width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px;" placeholder="e.g. Online or Room 101">
+            </div>
+            
+            <div class="form-group">
+                <label style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600;">Course Theme Color</label>
+                <input type="color" name="color" class="form-input" value="#0374B5" style="width: 100%; height: 44px; padding: 4px; border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer;">
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: var(--spacing-md); border-top: 1px solid var(--border-light); padding-top: var(--spacing-lg);">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">Create Course</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

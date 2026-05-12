@@ -1,0 +1,47 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Courses{% endblock %}
+
+{% block content %}
+<div class="page-title">My Courses</div>
+
+{% if courses %}
+<div class="grid grid-3">
+    {% for course in courses %}
+    <a href="{{ url_for('course_detail', course_slug=course.code) }}" style="text-decoration: none; color: inherit;">
+        <div class="course-card">
+            <div class="course-card-header" style="background: linear-gradient(135deg, {{ course.color }}, {{ course.color }}dd);"></div>
+            <div class="course-card-body">
+                <div class="course-code">{{ course.code }}</div>
+                <div class="course-name">{{ course.name }}</div>
+                <div class="course-instructor">{{ course.instructor.get_full_name() }}</div>
+                {% if course.room_location %}
+                <div class="course-meta">
+                    <span>📍 {{ course.room_location }}</span>
+                </div>
+                {% endif %}
+                <div class="course-progress">
+                    <div class="progress-bar" style="flex: 1;">
+                        <div class="progress-fill" style="width: {{ course.get_completion_percentage() }}%"></div>
+                    </div>
+                    <div class="course-progress-label">{{ course.get_completion_percentage() }}%</div>
+                </div>
+                <div style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary);">
+                    <span>{{ course.enrollments.count() }} students</span>
+                    <span>{{ course.assignments.count() }} assignments</span>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: var(--spacing-2xl);">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin: 0 auto var(--spacing-lg); opacity: 0.5;">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+    </svg>
+    <p style="color: var(--text-secondary);">No courses yet. Enroll in a course to get started!</p>
+</div>
+{% endif %}
+{% endblock %}

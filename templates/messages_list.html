@@ -1,0 +1,30 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="page-title">Messages</div>
+
+<div class="grid grid-2" style="gap: var(--spacing-lg); grid-template-columns: 300px 1fr;">
+    <!-- Conversations List -->
+    <div class="card" style="max-height: 600px; overflow-y: auto;">
+        <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">Conversations</h2>
+        {% for user in conversations %}
+        <a href="{{ url_for('conversation', user_id=user.id) }}" style="display: block; padding: var(--spacing-md); border-radius: var(--radius-md); text-decoration: none; color: inherit; transition: var(--transition);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
+            <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                <div class="user-avatar" style="width: 40px; height: 40px; font-size: 14px;">{{ user.first_name[0] }}{{ user.last_name[0] }}</div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ user.get_full_name() }}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">{{ user.username }}</div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    
+    <!-- Message Thread -->
+    <div class="card">
+        <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">Select a conversation or start a new message</h2>
+    </div>
+</div>
+{% endblock %}

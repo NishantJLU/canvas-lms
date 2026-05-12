@@ -1,0 +1,98 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="page-title">Settings</div>
+
+<div class="grid grid-2" style="gap: var(--spacing-xl);">
+    <!-- Profile Settings -->
+    <div class="card">
+        <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">Profile Settings</h2>
+        
+        <form onsubmit="updateProfile(event)">
+            <div class="form-group">
+                <label class="form-label">First Name</label>
+                <input type="text" id="first-name" value="{{ current_user.first_name }}" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Last Name</label>
+                <input type="text" id="last-name" value="{{ current_user.last_name }}" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Bio</label>
+                <textarea id="bio" class="form-textarea">{{ current_user.bio }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Save Changes</button>
+        </form>
+    </div>
+    
+    <!-- Theme Settings -->
+    <div class="card">
+        <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">Appearance</h2>
+        
+        <div class="form-group">
+            <label class="form-label">Theme</label>
+            <div style="display: flex; gap: var(--spacing-md);">
+                <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                    <input type="radio" name="theme" value="light" checked onchange="setTheme('light')">
+                    <span>Light</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                    <input type="radio" name="theme" value="dark" onchange="setTheme('dark')">
+                    <span>Dark</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                    <input type="radio" name="theme" value="auto" onchange="setTheme('auto')">
+                    <span>Auto</span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Account Settings -->
+<div class="card" style="margin-top: var(--spacing-xl);">
+    <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">Account Settings</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+        <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-md);">Email</div>
+            <div style="font-weight: 500;">{{ current_user.email }}</div>
+        </div>
+        <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-md);">Role</div>
+            <div style="font-weight: 500; text-transform: capitalize;">{{ current_user.role.value }}</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: var(--spacing-lg);">
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+</div>
+
+<script>
+    function updateProfile(e) {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('first_name', document.getElementById('first-name').value);
+        formData.append('last_name', document.getElementById('last-name').value);
+        formData.append('bio', document.getElementById('bio').value);
+        
+        fetch('{{ url_for("update_profile") }}', { method: 'POST', body: formData })
+            .then(() => alert('Profile updated successfully!'));
+    }
+    
+    function setTheme(theme) {
+        fetch('{{ url_for("set_theme") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ theme })
+        })
+        .then(() => {
+            document.documentElement.setAttribute('data-theme', theme === 'auto' ? 'light' : theme);
+            localStorage.setItem('theme', theme);
+        });
+    }
+</script>
+{% endblock %}

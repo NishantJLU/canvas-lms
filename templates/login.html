@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | EduFlow LMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #0f172a;
+            color: #1e293b;
+        }
+        .auth-image {
+            flex: 1.2;
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-image::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: pulse 15s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.1) translate(2%, 2%); }
+            100% { transform: scale(1) translate(0, 0); }
+        }
+        .auth-image-content {
+            position: relative;
+            z-index: 10;
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+        .auth-image-content h2 { font-size: 48px; font-weight: 800; margin-bottom: 24px; letter-spacing: -1px; }
+        .auth-image-content p { font-size: 18px; opacity: 0.9; max-width: 400px; margin: 0 auto; line-height: 1.6; }
+        
+        .auth-form-container {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            position: relative;
+        }
+        .auth-form-wrapper {
+            max-width: 420px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .logo-small {
+            width: 48px; height: 48px;
+            background: #4f46e5;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+        h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .subtitle { color: #64748b; margin-bottom: 40px; font-size: 15px; }
+        
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 14px; font-weight: 500; color: #334155; margin-bottom: 8px; }
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+        }
+        .btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.3);
+        }
+        
+        .auth-footer { margin-top: 32px; text-align: center; font-size: 14px; color: #64748b; }
+        .auth-footer a { color: #4f46e5; text-decoration: none; font-weight: 600; transition: color 0.2s; }
+        .auth-footer a:hover { color: #4338ca; }
+        
+        .error-message {
+            background: #fef2f2;
+            color: #ef4444;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 24px;
+            border-left: 4px solid #ef4444;
+        }
+        
+        @media (max-width: 900px) {
+            .auth-image { display: none; }
+            .auth-form-container { padding: 40px 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-image">
+        <div class="auth-image-content">
+            <h2>EduFlow LMS</h2>
+            <p>Experience a modern, beautifully designed learning management system that empowers students and educators.</p>
+        </div>
+    </div>
+    <div class="auth-form-container">
+        <div class="auth-form-wrapper">
+            <div class="logo-small">E</div>
+            <h1>Welcome back</h1>
+            <p class="subtitle">Please enter your details to sign in.</p>
+            
+            {% if error %}
+            <div class="error-message">{{ error }}</div>
+            {% endif %}
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-input" placeholder="Enter your username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn-primary">Sign in</button>
+            </form>
+            
+            <div class="auth-footer">
+                Don't have an account? <a href="{{ url_for('register') }}">Sign up</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

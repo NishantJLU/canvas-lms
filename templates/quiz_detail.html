@@ -1,0 +1,90 @@
+{% extends "base_modern.html" %}
+
+{% block title %}{{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: var(--spacing-xl);">
+    <a href="{{ url_for('course_detail', course_slug=quiz.course.code) }}" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: var(--spacing-sm);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Course
+    </a>
+</div>
+
+<div class="grid grid-2" style="gap: var(--spacing-xl);">
+    <div class="card">
+        <h1 class="card-title" style="margin-bottom: var(--spacing-lg);">{{ quiz.title }}</h1>
+        
+        {% if quiz.description %}
+        <p style="color: var(--text-secondary); margin-bottom: var(--spacing-xl);">{{ quiz.description }}</p>
+        {% endif %}
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+            <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Points Possible</div>
+                <div style="font-size: 24px; font-weight: 700;">{{ quiz.points_possible }}</div>
+            </div>
+            <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Questions</div>
+                <div style="font-size: 24px; font-weight: 700;">{{ quiz.questions.count() }}</div>
+            </div>
+            {% if quiz.time_limit_minutes %}
+            <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Time Limit</div>
+                <div style="font-size: 24px; font-weight: 700;">{{ quiz.time_limit_minutes }} min</div>
+            </div>
+            {% endif %}
+            <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Attempts</div>
+                <div style="font-size: 24px; font-weight: 700;">{{ quiz.attempts_allowed }}</div>
+            </div>
+        </div>
+        
+        {% if can_attempt %}
+        <button class="btn btn-primary" style="width: 100%; margin-bottom: var(--spacing-lg);" onclick="startQuiz()">Start Quiz</button>
+        {% else %}
+        <div style="padding: var(--spacing-lg); background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-md); color: var(--danger);">
+            Maximum attempts reached.
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="card">
+        <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">Previous Attempts</h2>
+        
+        {% if previous_attempts %}
+        {% for attempt in previous_attempts %}
+        <div style="padding: var(--spacing-lg); border-bottom: 1px solid var(--border-light);">
+            <div class="flex-between" style="margin-bottom: var(--spacing-md);">
+                <div style="font-weight: 600;">Attempt {{ attempt.attempt_number }}</div>
+                {% if attempt.score %}
+                <span style="font-size: 18px; font-weight: 700; color: var(--success);">{{ attempt.score }} / {{ quiz.points_possible }}</span>
+                {% endif %}
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary);">
+                {{ attempt.start_time.strftime('%b %d, %H:%M') }}
+                {% if attempt.end_time %}
+                - Completed in {{ attempt.get_duration_minutes() }} minutes
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p style="color: var(--text-secondary);">No attempts yet</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function startQuiz() {
+        fetch('{{ url_for("start_quiz", quiz_id=quiz.id) }}', { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `{{ url_for("take_quiz", quiz_id=quiz.id, attempt_id="") }}` + data.attempt_id;
+                }
+            });
+    }
+</script>
+{% endblock %}

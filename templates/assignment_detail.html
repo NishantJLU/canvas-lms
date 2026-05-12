@@ -1,0 +1,136 @@
+{% extends "base_modern.html" %}
+
+{% block title %}{{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: var(--spacing-xl);">
+    <a href="{{ url_for('course_detail', course_slug=assignment.course.code) }}" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: var(--spacing-sm);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Course
+    </a>
+</div>
+
+<div class="grid grid-2" style="gap: var(--spacing-xl);">
+    <!-- Left Column - Assignment Info -->
+    <div>
+        <div class="card">
+            <h1 class="card-title" style="margin-bottom: var(--spacing-lg);">{{ assignment.title }}</h1>
+            
+            <div style="margin-bottom: var(--spacing-xl);">
+                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: var(--spacing-md);">{{ assignment.description }}</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+                <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Points Possible</div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--primary);">{{ assignment.points_possible }}</div>
+                </div>
+                <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Submission Type</div>
+                    <div style="font-size: 16px; font-weight: 600;">{{ assignment.submission_type|title }}</div>
+                </div>
+            </div>
+            
+            <div style="padding: var(--spacing-lg); background: {% if is_overdue %}rgba(239, 68, 68, 0.1){% elif days_until_due <= 3 %}rgba(249, 115, 22, 0.1){% else %}rgba(16, 185, 129, 0.1){% endif %}; border-radius: var(--radius-md); border-left: 4px solid {% if is_overdue %}var(--danger){% elif days_until_due <= 3 %}var(--warning){% else %}var(--success){% endif %};">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Due Date</div>
+                <div style="font-size: 18px; font-weight: 600;">{{ assignment.due_date.strftime('%b %d, %H:%M') }}</div>
+                <div style="font-size: 14px; margin-top: var(--spacing-sm); color: {% if is_overdue %}var(--danger){% elif days_until_due <= 3 %}var(--warning){% else %}var(--success){% endif %};">
+                    {% if is_overdue %}
+                    Overdue
+                    {% elif days_until_due == 0 %}
+                    Due Today
+                    {% elif days_until_due == 1 %}
+                    Due Tomorrow
+                    {% else %}
+                    {{ days_until_due }} days remaining
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Rubric -->
+        {% if assignment.rubric %}
+        <div class="card" style="margin-top: var(--spacing-lg);">
+            <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">Grading Rubric</h2>
+            <!-- Rubric content would go here -->
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Right Column - Submission -->
+    <div>
+        {% if submission %}
+        <div class="card">
+            <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">Your Submission</h2>
+            
+            {% if submission.status == 'graded' %}
+            <div style="padding: var(--spacing-lg); background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-md); margin-bottom: var(--spacing-lg);">
+                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Your Score</div>
+                <div style="font-size: 32px; font-weight: 700; color: var(--success);">{{ submission.score }} / {{ assignment.points_possible }}</div>
+                <div style="font-size: 12px; color: var(--success); margin-top: var(--spacing-sm);">Graded on {{ submission.submitted_at.strftime('%b %d') }}</div>
+            </div>
+            {% endif %}
+            
+            <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md); margin-bottom: var(--spacing-lg);">
+                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: var(--spacing-sm);">Status</div>
+                <span class="badge {% if submission.status == 'graded' %}badge-success{% elif submission.status == 'submitted' %}badge-primary{% else %}badge-warning{% endif %}">{{ submission.status|title }}</span>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: var(--spacing-md);">
+                    Submitted: {{ submission.submitted_at.strftime('%b %d, %H:%M') }}
+                    {% if submission.is_late %}<br><span class="badge badge-danger">Late</span>{% endif %}
+                </div>
+            </div>
+            
+            {% if submission.feedback %}
+            <div style="padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--radius-md);">
+                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: var(--spacing-md);">Instructor Feedback</div>
+                <p>{{ submission.feedback }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="card">
+            <h2 class="card-title" style="margin-bottom: var(--spacing-lg);">Submit Assignment</h2>
+            
+            <form onsubmit="submitAssignment(event)">
+                <div class="form-group">
+                    <label class="form-label">Submission</label>
+                    {% if assignment.submission_type == 'file' %}
+                    <input type="file" id="file-input" class="form-input" required>
+                    {% elif assignment.submission_type == 'text' %}
+                    <textarea id="submission-text" class="form-textarea" required></textarea>
+                    {% endif %}
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Assignment</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function submitAssignment(e) {
+        e.preventDefault();
+        const formData = new FormData();
+        
+        {% if assignment.submission_type == 'file' %}
+        formData.append('file', document.getElementById('file-input').files[0]);
+        {% else %}
+        formData.append('submission_text', document.getElementById('submission-text').value);
+        {% endif %}
+        
+        fetch('{{ url_for("submit_assignment", assignment_id=assignment.id) }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('Assignment submitted successfully!');
+                location.reload();
+            }
+        });
+    }
+</script>
+{% endblock %}

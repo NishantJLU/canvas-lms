@@ -1,0 +1,61 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Attendance - {{ course.name }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: var(--spacing-xl);">
+    <a href="{{ url_for('admin_dashboard') }}" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: var(--spacing-sm);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back to Admin
+    </a>
+</div>
+
+<h1 class="page-title" style="margin-bottom: var(--spacing-lg);">Attendance - {{ course.name }}</h1>
+
+<div class="card">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--border-light);">
+                <th style="padding: var(--spacing-md); text-align: left;">Student</th>
+                <th style="padding: var(--spacing-md); text-align: center;">Present</th>
+                <th style="padding: var(--spacing-md); text-align: center;">Absent</th>
+                <th style="padding: var(--spacing-md); text-align: center;">Late</th>
+                <th style="padding: var(--spacing-md); text-align: center;">Percentage</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for enrollment in course.enrollments %}
+            <tr style="border-bottom: 1px solid var(--border-light);">
+                <td style="padding: var(--spacing-md); font-weight: 500;">{{ enrollment.student.get_full_name() }}</td>
+                <td style="padding: var(--spacing-md); text-align: center;">
+                    {{ enrollment.get_attendance_percentage() * 100 | round(1) }}%
+                </td>
+                <td style="padding: var(--spacing-md); text-align: center;">
+                    <select class="form-input" style="width: 80px;" onchange="updateAttendance({{ enrollment.id }}, 'absent', this.value)">
+                        <option>Select</option>
+                        <option value="1">Mark</option>
+                    </select>
+                </td>
+                <td style="padding: var(--spacing-md); text-align: center;">
+                    <select class="form-input" style="width: 80px;" onchange="updateAttendance({{ enrollment.id }}, 'late', this.value)">
+                        <option>Select</option>
+                        <option value="1">Mark</option>
+                    </select>
+                </td>
+                <td style="padding: var(--spacing-md); text-align: center; font-weight: 600;">
+                    {{ (enrollment.get_attendance_percentage() * 100) | round(1) }}%
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function updateAttendance(enrollmentId, type, value) {
+        console.log(`Update ${type} for enrollment ${enrollmentId}`);
+    }
+</script>
+{% endblock %}
