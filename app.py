@@ -269,6 +269,26 @@ def course_detail(course_slug):
         active='courses'
     )
 
+@app.route('/courses/<course_slug>/settings', methods=['GET', 'POST'])
+@login_required
+def course_settings(course_slug):
+    course = Course.query.filter_by(code=course_slug).first_or_404()
+    
+    # Only teachers can access settings
+    if current_user.role != UserRole.TEACHER:
+        return redirect(url_for('course_detail', course_slug=course_slug))
+    
+    if request.method == 'POST':
+        course.name = request.form.get('name')
+        course.code = request.form.get('code')
+        course.description = request.form.get('description')
+        course.room_location = request.form.get('room_location')
+        course.credits = request.form.get('credits')
+        db.session.commit()
+        return redirect(url_for('course_detail', course_slug=course.code))
+        
+    return render_template('course_settings.html', course=course, active='courses')
+
 @app.route('/courses/<course_id>/modules/<module_id>')
 @login_required
 def module_detail(course_id, module_id):
@@ -713,23 +733,7 @@ def create_course():
     
     return render_template('create_course.html', active='admin')
 
-@app.route('/admin/courses/<course_id>/settings', methods=['GET', 'POST'])
-@login_required
-def course_settings(course_id):
-    course = Course.query.get(course_id)
-    if not course or (current_user.role == UserRole.TEACHER and course.instructor_id != current_user.id):
-        return redirect(url_for('admin_dashboard'))
-    
-    if request.method == 'POST':
-        course.name = request.form.get('name', course.name)
-        course.description = request.form.get('description', course.description)
-        course.color = request.form.get('color', course.color)
-        course.room_location = request.form.get('room_location', course.room_location)
-        
-        db.session.commit()
-        return redirect(url_for('course_detail', course_slug=course.code))
-    
-    return render_template('course_settings.html', course=course, active='admin')
+
 
 @app.route('/admin/gradebook/<course_id>')
 @login_required
